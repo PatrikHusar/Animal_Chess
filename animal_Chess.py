@@ -4,9 +4,10 @@ from PIL import ImageTk, Image
 import os
 
 root = Tk()
+path = os.path.dirname(os.path.abspath(__file__))
 canvas = Canvas(root, width=540, height=600)
 canvas.grid(columnspan=5, rowspan=4)
-subor = Image.open(os.path.dirname(os.path.abspath(__file__)) + '//whoEatWho.png')
+subor = Image.open(path + '//whoEatWho.png')
 picture = subor.resize((540, 60), Image.LANCZOS)
 subor = ImageTk.PhotoImage(picture)
 canvas.create_image((0, 540), image=subor, anchor=NW)
@@ -20,12 +21,45 @@ def animal(event):
                 policko.changeMyCard()
 
 def changeTitle():
+    global title, allowed
+    if allowed == 1:
+        if title == 'blue':
+            title = 'red'
+        else:
+            title = 'blue'
+        root.title(title)
+    
+def remains(animalsRemain1, animalsRemain2, group):
     global title
-    if title == 'blue':
-        title = 'red'
-    else:
-        title = 'blue'
-    root.title(title)
+    if 'elephant' in animalsRemain1:
+            if 'mouse' in animalsRemain2:
+                root.title(f'{group} win!!!')
+            else:
+                root.title(f'{group} win!!!')
+    if 'lion' in animalsRemain1:
+        root.title(f'{group} win!!!')
+    if 'tiger' in animalsRemain1 and not 'lion' in animalsRemain2:
+        root.title(f'{group} win!!!')
+    if 'puma' in animalsRemain1 and not 'lion' in animalsRemain2 and not 'tiger' in animalsRemain2:
+        root.title(f'{group} win!!!')
+    if 'wolf' in animalsRemain1 and not 'lion' in animalsRemain2 and not 'tiger' in animalsRemain2 and not 'puma' in animalsRemain2:
+        root.title(f'{group} win!!!')
+    if 'dog' in animalsRemain1 and not 'lion' in animalsRemain2  and not 'tiger' in animalsRemain2  and not 'puma' in animalsRemain2  and not 'wolf' in animalsRemain2:
+        root.title(f'{group} win!!!')
+    if 'cat' in animalsRemain1 and not 'lion' in animalsRemain2 and not 'tiger' in animalsRemain2 and not 'puma' in animalsRemain2 and not 'wolf' in animalsRemain2 and not 'dog' in animalsRemain2:
+        root.title(f'{group} win!!!')
+            
+def someoneKilled(index):
+    global title, allowed
+    animalsRemain[index] = 0
+    if animalsRemain[::2].count(0) >= 7 and animalsRemain[1::2].count(0) >= 7 or animalsRemain[::2].count(0) == 8 or animalsRemain[1::2].count(0) == 8:
+        allowed = 0
+        if animalsRemain[::2] == animalsRemain[1::2]:
+            root.title('Draw!!!')
+        else:
+            remains(animalsRemain[::2], animalsRemain[1::2], 'blue')
+            remains(animalsRemain[1::2], animalsRemain[::2], 'red')
+        
 
 class Policko():
     path = os.path.dirname(os.path.abspath(__file__))
@@ -121,6 +155,8 @@ class Policko():
             elif not self.killer == -1 and not title == self.group and not self.group == '' and not self.owner == -1:
                 if animals[self.killer].y == self.y + 135 and animals[self.killer].x == self.x or animals[self.killer].y == self.y - 135 and animals[self.killer].x == self.x or animals[self.killer].x == self.x - 135 and animals[self.killer].y == self.y or animals[self.killer].x == self.x + 135 and animals[self.killer].y == self.y:
                     if policka[self.killer].animalName == self.animalName:
+                        someoneKilled(self.owner.animalFileIndex)
+                        someoneKilled(animals[self.killer].animalFileIndex)
                         self.owner.animalObjectIndex = -1
                         animals[self.killer].animalObjectIndex = -1
                         canvas.delete(self.owner.animal)
@@ -132,62 +168,19 @@ class Policko():
                         changeTitle()
 
                     elif policka[self.killer].animalName == 'elephant' and not self.animalName == 'mouse':
-                        animals[self.killer].x = self.owner.x
-                        animals[self.killer].y = self.owner.y
-                        self.pos = (animals[self.killer].y / 135) * 4 + (animals[self.killer].x / 135)
-                        canvas.delete(self.owner.animal)
-                        animals[self.killer].resizePicture(135)
-
-                        animals[self.killer].animalObjectIndex = self.animalObjectIndex
-                        animals[self.animalObjectIndex] = animals[self.killer]
-                        self.group = animals[self.animalObjectIndex].group
-                        animals[self.animalObjectIndex].animalFileIndex = animals[self.killer].animalFileIndex
-                        self.animalFileIndex = animals[self.animalObjectIndex].animalFileIndex
-                        self.animalName = policka[self.killer].animalName
-                        self.owner = animals[self.animalObjectIndex]
-                        animals[self.killer].animalObjectIndex = self.animalObjectIndex
-
-                        policka[self.killer].owner = -1
-                        policka[self.killer].animalFileIndex = -1
-                        policka[self.killer].animalName = ''
-                        policka[self.killer].group = ''
-
-                        self.killer = -1
-                        self.__setVariables()
-                        changeTitle()
+                        self.killProcess()
 
                     elif policka[self.killer].animalName == 'elephant' and self.animalName == 'mouse':
-                        pass
+                        someoneKilled(self.owner.animalFileIndex)
 
                     elif policka[self.killer].animalName == 'mouse' and self.animalName == 'elephant':
-                        animals[self.killer].x = self.owner.x
-                        animals[self.killer].y = self.owner.y
-                        self.pos = (animals[self.killer].y / 135) * 4 + (animals[self.killer].x / 135)
-                        canvas.delete(self.owner.animal)
-                        animals[self.killer].resizePicture(135)
-
-                        animals[self.killer].animalObjectIndex = self.animalObjectIndex
-                        animals[self.animalObjectIndex] = animals[self.killer]
-                        self.group = animals[self.animalObjectIndex].group
-                        animals[self.animalObjectIndex].animalFileIndex = animals[self.killer].animalFileIndex
-                        self.animalFileIndex = animals[self.animalObjectIndex].animalFileIndex
-                        self.animalName = policka[self.killer].animalName
-                        self.owner = animals[self.animalObjectIndex]
-                        animals[self.killer].animalObjectIndex = self.animalObjectIndex
-
-                        policka[self.killer].owner = -1
-                        policka[self.killer].animalFileIndex = -1
-                        policka[self.killer].animalName = ''
-                        policka[self.killer].group = ''
-
-                        self.killer = -1
-                        self.__setVariables()
-                        changeTitle()
+                        self.killProcess()
 
                     elif policka[self.killer].animalFileIndex > self.animalFileIndex:
                         animals[self.killer].x = self.owner.x
                         animals[self.killer].y = self.owner.y
                         self.pos = (animals[self.killer].y / 135) * 4 + (animals[self.killer].x / 135)
+                        someoneKilled(self.owner.animalFileIndex)
                         canvas.delete(self.owner.animal)
                         animals[self.killer].resizePicture(135)
 
@@ -237,17 +230,43 @@ class Policko():
     def __setVariables(self):
         for policko in policka:
             policko.killer = self.killer
+            
+    def killProcess(self):
+        someoneKilled(self.owner.animalFileIndex)
+        animals[self.killer].x = self.owner.x
+        animals[self.killer].y = self.owner.y
+        self.pos = (animals[self.killer].y / 135) * 4 + (animals[self.killer].x / 135)
+        canvas.delete(self.owner.animal)
+        animals[self.killer].resizePicture(135)
+
+        animals[self.killer].animalObjectIndex = self.animalObjectIndex
+        animals[self.animalObjectIndex] = animals[self.killer]
+        self.group = animals[self.animalObjectIndex].group
+        animals[self.animalObjectIndex].animalFileIndex = animals[self.killer].animalFileIndex
+        self.animalFileIndex = animals[self.animalObjectIndex].animalFileIndex
+        self.animalName = policka[self.killer].animalName
+        self.owner = animals[self.animalObjectIndex]
+        animals[self.killer].animalObjectIndex = self.animalObjectIndex
+
+        policka[self.killer].owner = -1
+        policka[self.killer].animalFileIndex = -1
+        policka[self.killer].animalName = ''
+        policka[self.killer].group = ''
+
+        self.killer = -1
+        self.__setVariables()
+        changeTitle()
 
 class Animal():
     path = os.path.dirname(os.path.abspath(__file__))
     redAnimals = [path + '//redMouse.png',
-                path + '//redCat.png',
-                path + '//redDog.png',
-                path + '//redWolf.png',
-                path + '//redPuma.png',
-                path + '//redTiger.png',
-                path + '//redLion.png',
-                path + '//redElephant.png']
+                    path + '//redCat.png',
+                    path + '//redDog.png',
+                    path + '//redWolf.png',
+                    path + '//redPuma.png',
+                    path + '//redTiger.png',
+                    path + '//redLion.png',
+                    path + '//redElephant.png']
 
     blueAnimals = [path + '//blueMouse.png',
                     path + '//blueCat.png',
@@ -285,9 +304,6 @@ class Animal():
         self.__biggerSubor = ImageTk.PhotoImage(self.__resizedPic)
         self.animal = canvas.create_image((self.x, self.y), image=self.__biggerSubor, anchor=NW)
 
-animals = []
-policka = []
-
 starterTitle = random.randint(0, 1)
 title = ''
 if starterTitle == 0:
@@ -297,6 +313,26 @@ else:
     title = 'red'
     root.title(title)
 
+animals = []
+policka = []
+allowed = 1
+animalsRemain = ['mouse',
+                'mouse',
+                'cat',
+                'cat',
+                'dog',
+                'dog',
+                'wolf',
+                'wolf',
+                'puma',
+                'puma',
+                'tiger',
+                'tiger',
+                'lion',
+                'lion',
+                'elephant',
+                'elephant']
+
 index = 0
 for y in range(4):
     for x in range(4):
@@ -304,5 +340,4 @@ for y in range(4):
         index += 1
 
 root.bind('<Button-1>', animal)
-
 root.mainloop()
